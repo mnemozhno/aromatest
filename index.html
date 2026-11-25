@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мне можно — подбор аромата</title>
+    <style>
+        :root {
+            --bg-cream: #F6F2EA;
+            --card-white: #FFFFFF;
+            --text-graphite: #3C3026;
+            --text-muted: #706255;
+            --accent-raspberry: #A62B43;
+            --accent-raspberry-dark: #882034;
+            --accent-pistachio: #7E8F69;
+            --border-sand: #E6DEC1;
+            --soft-cream: #FDFBF7;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-graphite);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            background: var(--card-white);
+            border-radius: 28px;
+            padding: 24px 22px 28px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 8px 30px rgba(60, 48, 38, 0.06);
+            text-align: center;
+        }
+        /* Логотип бренда */
+        .brand-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .brand-logo-img {
+            width: 230px;
+            max-width: 78%;
+            height: auto;
+            display: block;
+            mix-blend-mode: multiply;
+        }
+        /* Фото свечи на стартовом экране с мягким расплыванием */
+        .candle-hero {
+            width: 100%;
+            max-height: 215px;
+            margin: 4px auto 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .candle-hero img {
+            width: 100%;
+            max-width: 270px;
+            height: auto;
+            object-fit: cover;
+            opacity: 0.85;
+            filter: contrast(0.92) brightness(1.04) saturate(0.92);
+            mask-image: radial-gradient(ellipse 62% 58% at 50% 50%, rgba(0,0,0,1) 34%, rgba(0,0,0,0) 88%);
+            -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 50%, rgba(0,0,0,1) 34%, rgba(0,0,0,0) 88%);
+        }
+        h1 {
+            font-size: 22px;
+            line-height: 1.35;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+            color: var(--text-graphite);
+        }
+        .subtitle {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-muted);
+            margin: 0 0 24px 0;
+        }
+        .btn-primary {
+            background-color: var(--accent-raspberry);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 100px;
+            padding: 16px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.12s, background-color 0.2s;
+            box-shadow: 0 6px 16px rgba(166, 43, 67, 0.18);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+            background-color: var(--accent-raspberry-dark);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-sand);
+            border-radius: 100px;
+            padding: 13px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        /* Экран вопросов */
+        .quiz-screen, .result-screen {
+            display: none;
+        }
+        .step-indicator {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--accent-pistachio);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .progress-bar {
+            height: 4px;
+            background: #EAE3D5;
+            border-radius: 4px;
+            margin-bottom: 22px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-raspberry);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+            margin-top: 18px;
+        }
+        .option-btn {
+            background: var(--soft-cream);
+            border: 1px solid var(--border-sand);
+            border-radius: 16px;
+            padding: 15px 16px;
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--text-graphite);
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        .option-btn:active {
+            background: #F3ECE0;
+            border-color: var(--accent-raspberry);
+            color: var(--accent-raspberry);
+        }
+        /* Экран результатов (Топ-3) */
+        .result-header {
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--text-graphite);
+            margin: 6px 0 6px;
+        }
+        .result-note {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0 0 18px;
+            line-height: 1.4;
+        }
+        .aroma-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-bottom: 22px;
+        }
+        .aroma-item {
+            background: var(--soft-cream);
+            border: 1px solid var(--border-sand);
+            border-radius: 18px;
+            padding: 14px 16px;
+            position: relative;
+        }
+        .aroma-item.top-one {
+            border-color: var(--accent-raspberry);
+            background: #FFF9FA;
+        }
+        .aroma-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+            background: #EFEAD8;
+            color: var(--text-graphite);
+        }
+        .aroma-item.top-one .aroma-badge {
+            background: var(--accent-raspberry);
+            color: #FFFFFF;
+        }
+        .aroma-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-graphite);
+            margin-bottom: 4px;
+        }
+        .aroma-notes {
+            font-size: 12px;
+            color: var(--accent-pistachio);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .aroma-desc {
+            font-size: 14px;
+            line-height: 1.45;
+            color: var(--text-muted);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. СТАРТОВЫЙ ЭКРАН -->
+    <div class="card" id="start-card">
+        <div class="brand-header">
+            <img class="brand-logo-img" src="logo.jpg" alt="Мне можно — Свечи и ароматы">
+        </div>
+
+        <div class="candle-hero">
+            <img src="candle.jpg" alt="Десертные свечи Мне можно">
+        </div>
+
+        <h1>Какой аромат созвучен вам сейчас?</h1>
+        <p class="subtitle">Ответьте на 5 коротких вопросов — мы подберём 3 аромата под ваше текущее состояние</p>
+        <button class="btn-primary" onclick="startQuiz()">Начать подбор</button>
+    </div>
+
+    <!-- 2. ЭКРАН С 5 ВОПРОСАМИ -->
+    <div class="card quiz-screen" id="quiz-card">
+        <div class="step-indicator" id="step-label">Вопрос 1 из 5</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        <h1 id="question-text"></h1>
+        <div class="options" id="options-container"></div>
+    </div>
+
+    <!-- 3. ЭКРАН РЕЗУЛЬТАТА (ТОП-3 + TELEGRAM) -->
+    <div class="card result-screen" id="result-card">
+        <div class="brand-header" style="margin-bottom: 8px;">
+            <img class="brand-logo-img" src="logo.jpg" alt="Мне можно" style="width: 165px;">
+        </div>
+        <div class="result-header">Сейчас вам подойдут:</div>
+        <p class="result-note">Послушайте эти ароматы на нашем стенде или закажите с доставкой</p>
+
+        <div class="aroma-list" id="aroma-list"></div>
+
+        <a id="tg-order-btn" class="btn-primary" href="https://t.me/+79099126918" target="_blank" rel="noopener">
+            Заказать в Telegram
+        </a>
+        <button class="btn-secondary" onclick="resetQuiz()">Пройти тест ещё раз</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                text: "Чего вам больше всего хочется прямо сейчас?",
+                options: [
+                    { text: "Замедлиться, укутаться в тишину и выдохнуть", tags: ["cozy", "wood"] },
+                    { text: "Глотка свежего воздуха, лёгкости и ясности", tags: ["fresh", "citrus"] },
+                    { text: "Тёплой радости, праздника и ощущения «мне можно всё»", tags: ["sweet", "citrus"] },
+                    { text: "Глубины, загадки и красивого вечернего настроения", tags: ["wood", "berry"] }
+                ]
+            },
+            {
+                text: "Какой вкус или напиток точнее попадёт в настроение дня?",
+                options: [
+                    { text: "Свежеиспечённый круассан с ванильным кремом", tags: ["sweet", "cozy"] },
+                    { text: "Спелый мандарин с веточкой розмарина или хвои", tags: ["citrus", "fresh"] },
+                    { text: "Ягодный десерт с терпкой малиной и шоколадом", tags: ["berry", "sweet"] },
+                    { text: "Терпкий травяной чай у камина", tags: ["wood", "cozy"] }
+                ]
+            },
+            {
+                text: "Какая атмосфера дома для вас идеальна?",
+                options: [
+                    { text: "Мягкий свет, кашемировый плед и любимая книга", tags: ["cozy", "wood"] },
+                    { text: "Чистота, прохладное утро и солнечные блики на стене", tags: ["fresh", "citrus"] },
+                    { text: "Смех близких, огоньки гирлянд и аромат выпечки", tags: ["sweet", "berry"] },
+                    { text: "Спокойный вечер только для себя без лишней суеты", tags: ["wood", "cozy"] }
+                ]
+            },
+            {
+                text: "Какие ноты в парфюмерии и свечах вы обычно выбираете?",
+                options: [
+                    { text: "Сочные цитрусы, бергамот, зелёный лист", tags: ["citrus", "fresh"] },
+                    { text: "Сливочную ваниль, карамель, тёплую выпечку", tags: ["sweet", "cozy"] },
+                    { text: "Сандал, кедр, амбру и лёгкую пряность", tags: ["wood", "cozy"] },
+                    { text: "Спелые ягоды, малину, смородину с кислинкой", tags: ["berry", "citrus"] }
+                ]
+            },
+            {
+                text: "Для кого или какого повода вы присматриваете аромат?",
+                options: [
+                    { text: "Для себя — чтобы радовать себя каждый день без повода", tags: ["berry", "cozy"] },
+                    { text: "Создать дома зимнее праздничное настроение", tags: ["citrus", "sweet"] },
+                    { text: "В подарок близкому человеку — хочется беспроигрышный вариант", tags: ["citrus", "cozy"] },
+                    { text: "Для вечернего отдыха и перезагрузки после дел", tags: ["wood", "fresh"] }
+                ]
+            }
+        ];
+
+        const aromas = [
+            {
+                id: "mandarin",
+                name: "Сочный мандарин и хвоя",
+                notes: "Ноты: спелый мандарин • еловая ветка • лёгкая цедра",
+                desc: "Искрящийся, живой аромат только что очищенного мандарина и морозного хвойного леса. Мгновенно поднимает настроение и наполняет дом ощущением праздника.",
+                tags: ["citrus", "fresh"]
+            },
+            {
+                id: "raspberry_dessert",
+                name: "Малиновый десерт со сливками",
+                notes: "Ноты: свежая малина • взбитые сливки • тёплый бисквит",
+                desc: "Нежный, ягодно-сливочный аромат с тонкой малиновой кислинкой и мягкой ванильной базой. Уютный десерт, который можно позволить себе в любое время дня.",
+                tags: ["berry", "sweet"]
+            },
+            {
+                id: "vanilla_cozy",
+                name: "Тёплая ваниль и кашемир",
+                notes: "Ноты: мадагаскарская ваниль • топленое молоко • белый мускус",
+                desc: "Мягкий, обволакивающий аромат спокойствия и домашнего тепла. Не приторный, деликатный — словно тёплые объятия в прохладный вечер.",
+                tags: ["cozy", "sweet"]
+            },
+            {
+                id: "sandal_amber",
+                name: "Сандал, амбра и пряный кедр",
+                notes: "Ноты: благородный сандал • тёплая амбра • кедр • кардамон",
+                desc: "Глубокий, бархатистый древесно-пряный аромат. Помогает замедлиться, отпустить суету дня и настроиться на спокойный вечерний отдых.",
+                tags: ["wood", "cozy"]
+            },
+            {
+                id: "bergamot_fresh",
+                name: "Бергамот и морозная свежесть",
+                notes: "Ноты: бергамот • зелёный чай • белые цветы • прохладный воздух",
+                desc: "Чистый, прозрачный и бодрящий аромат с благородной цитрусовой горчинкой. Дарит ощущение свежего утра, лёгкости и ясности мыслей.",
+                tags: ["fresh", "citrus"]
+            },
+            {
+                id: "berry_mulled",
+                name: "Пряная ягода и глинтвейн",
+                notes: "Ноты: чёрная смородина • апельсин • корица • бадьян",
+                desc: "Тёплый, согревающий аромат зимних ягод со специями. Создаёт атмосферу камерного вечера при свечах и долгих душевных разговоров.",
+                tags: ["berry", "wood"]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let tagScores = { citrus: 0, fresh: 0, sweet: 0, cozy: 0, wood: 0, berry: 0 };
+
+        function startQuiz() {
+            document.getElementById('start-card').style.display = 'none';
+            document.getElementById('quiz-card').style.display = 'block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('step-label').innerText = `Вопрос ${currentQuestion + 1} из ${questions.length}`;
+            document.getElementById('progress').style.width = `${(currentQuestion / questions.length) * 100}%`;
+            document.getElementById('question-text').innerText = q.text;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt.text;
+                btn.onclick = () => selectOption(opt.tags);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectOption(tags) {
+            tags.forEach(t => {
+                if (tagScores[t] !== undefined) tagScores[t]++;
+            });
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('quiz-card').style.display = 'none';
+            document.getElementById('result-card').style.display = 'block';
+
+            const ranked = aromas
+                .map(aroma => {
+                    const score = aroma.tags.reduce((sum, tag) => sum + (tagScores[tag] || 0), 0);
+                    return { ...aroma, score };
+                })
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 3);
+
+            const listContainer = document.getElementById('aroma-list');
+            listContainer.innerHTML = '';
+
+            ranked.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = index === 0 ? 'aroma-item top-one' : 'aroma-item';
+                const badgeText = index === 0 ? '№ 1 · Идеальное попадание' : `№ ${index + 1} · Также подойдёт`;
+                div.innerHTML = `
+                    <div class="aroma-badge">${badgeText}</div>
+                    <div class="aroma-name">${item.name}</div>
+                    <div class="aroma-notes">${item.notes}</div>
+                    <p class="aroma-desc">${item.desc}</p>
+                `;
+                listContainer.appendChild(div);
+            });
+
+            const topNames = ranked.map(r => r.name).join(', ');
+            const tgMessage = encodeURIComponent(`Здравствуйте! Прошла подбор аромата «Мне можно». Мой топ-3: ${topNames}. Подскажите, пожалуйста, что есть в наличии?`);
+            document.getElementById('tg-order-btn').href = `https://t.me/+79099126918?text=${tgMessage}`;
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            tagScores = { citrus: 0, fresh: 0, sweet: 0, cozy: 0, wood: 0, berry: 0 };
+            document.getElementById('result-card').style.display = 'none';
+            document.getElementById('start-card').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
